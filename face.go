@@ -147,6 +147,14 @@ func (f *Face) CharMap() CharMap {
 
 // Methods
 
+func (f *Face) SetCharSize(charWidth, charHeight int64, horzResolution, vertResolution uint) error {
+	errno := C.FT_Set_Char_Size(f.handle, C.FT_F26Dot6(charWidth), C.FT_F26Dot6(charHeight), C.FT_UInt(horzResolution), C.FT_UInt(vertResolution))
+	if errno != 0 {
+		return fmt.Errorf("Face.SetCharSize error code: %d", errno)
+	}
+	return nil
+}
+
 func (f *Face) SetPixelSizes(width, height uint) error {
 	errno := C.FT_Set_Pixel_Sizes(f.handle, C.FT_UInt(width), C.FT_UInt(height))
 	if errno != 0 {
