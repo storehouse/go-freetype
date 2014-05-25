@@ -28,6 +28,10 @@ func InitFreeType() (*Library, error) {
 	return lib, nil
 }
 
-func (l *Library) Done() {
-	C.FT_Done_FreeType(l.handle)
+func (l *Library) Done() error {
+	errno := C.FT_Done_FreeType(l.handle)
+	if errno != 0 {
+		return fmt.Errorf("Library.Done: Could not free Library. Error code: %d", errno)
+	}
+	return nil
 }
