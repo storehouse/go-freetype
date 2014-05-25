@@ -147,6 +147,14 @@ func (f *Face) CharMap() CharMap {
 
 // Methods
 
+func (f *Face) SelectCharmap(encoding int) error {
+	errno := C.FT_Select_Charmap(f.handle, C.FT_Encoding(encoding))
+	if errno != 0 {
+		return fmt.Errorf("Face.SelectCharmap error code: %d", errno)
+	}
+	return nil
+}
+
 func (f *Face) SetCharSize(charWidth, charHeight int64, horzResolution, vertResolution uint) error {
 	errno := C.FT_Set_Char_Size(f.handle, C.FT_F26Dot6(charWidth), C.FT_F26Dot6(charHeight), C.FT_UInt(horzResolution), C.FT_UInt(vertResolution))
 	if errno != 0 {
