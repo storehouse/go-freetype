@@ -1,8 +1,13 @@
 language: go
 go: 1.2
 before_install:
- - sudo apt-get update -qq
- - sudo apt-get install -qq libfreetype6-dev
+- sudo apt-get update -qq
+- sudo apt-get install -qq libfreetype6-dev
+- go get -u gopkg.in/check.v1
+- go get -u code.google.com/p/go.tools/cmd/cover
+- go get -u github.com/mattn/goveralls
 script:
-- go test -v
-
+- go test -race -i
+- go test -covermode=count -coverprofile=profile.cov
+- go test -v -gocheck.v -race -cpu=2 ./...
+- $HOME/gopath/bin/goveralls -coverprofile=profile.cov -service=travis-ci
