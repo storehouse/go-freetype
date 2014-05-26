@@ -5,17 +5,35 @@ import (
 	"testing"
 )
 
+const (
+	fontFilePathName = "/usr/share/fonts/truetype/DejaVuSans.ttf"
+)
+
 func Test(t *testing.T) { TestingT(t) }
 
-type FreetypeSuite struct{}
+type FreetypeSuite struct {
+	lib  *Library
+	face *Face
+}
 
 var _ = Suite(&FreetypeSuite{})
 
-func (s *FreetypeSuite) TestLibrary(c *C) {
-	lib, err := InitFreeType()
+func (s *FreetypeSuite) SetUpSuite(c *C) {
+	var err error
+	s.lib, err = InitFreeType()
 	c.Assert(err, IsNil)
-	c.Assert(lib, Not(IsNil))
+	c.Assert(s.lib, Not(IsNil))
 
-	err = lib.Done()
+	s.face, err = NewFace(s.lib, fontFilePathName, 0)
+	c.Assert(err, IsNil)
+	c.Assert(s.face, Not(IsNil))
+}
+
+func (s *FreetypeSuite) TearDownSuite(c *C) {
+	var err error
+	err = s.face.Done()
+	c.Assert(err, IsNil)
+
+	err = s.lib.Done()
 	c.Assert(err, IsNil)
 }

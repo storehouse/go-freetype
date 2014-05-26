@@ -7,10 +7,6 @@ package freetype
 */
 import "C"
 
-import (
-	"fmt"
-)
-
 // A handle to a FreeType library instance.
 // Each ‘library’ is completely independent from the others;
 // it is the ‘root’ of a set of objects like fonts, faces, sizes, etc.
@@ -23,7 +19,7 @@ func InitFreeType() (*Library, error) {
 	lib := &Library{}
 	errno := C.FT_Init_FreeType(&lib.handle)
 	if errno != 0 {
-		return nil, fmt.Errorf("Could not init freetype library. Error code: %d", errno)
+		return nil, GetError(errno)
 	}
 	return lib, nil
 }
@@ -31,7 +27,7 @@ func InitFreeType() (*Library, error) {
 func (l *Library) Done() error {
 	errno := C.FT_Done_FreeType(l.handle)
 	if errno != 0 {
-		return fmt.Errorf("Library.Done: Could not free Library. Error code: %d", errno)
+		return GetError(errno)
 	}
 	return nil
 }

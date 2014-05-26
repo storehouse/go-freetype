@@ -8,7 +8,6 @@ package freetype
 import "C"
 
 import (
-	"fmt"
 	"reflect"
 	"unsafe"
 )
@@ -24,15 +23,16 @@ func NewFace(library *Library, filePathName string, faceIndex int64) (*Face, err
 	defer C.free(unsafe.Pointer(cfilePathName))
 	errno := C.FT_New_Face(library.handle, cfilePathName, C.FT_Long(faceIndex), &f.handle)
 	if errno != 0 {
-		return nil, fmt.Errorf("Library.NewFace error code: %d", errno)
+		return nil, GetError(errno)
 	}
 	return f, nil
 }
 
 // TODO OpenFace
 
-func (f *Face) Done() {
-	C.FT_Done_Face(f.handle)
+func (f *Face) Done() error {
+	errno := C.FT_Done_Face(f.handle)
+	return GetError(errno)
 }
 
 func (f *Face) NumFaces() int64 {
@@ -150,7 +150,7 @@ func (f *Face) CharMap() CharMap {
 func (f *Face) SelectCharmap(encoding int) error {
 	errno := C.FT_Select_Charmap(f.handle, C.FT_Encoding(encoding))
 	if errno != 0 {
-		return fmt.Errorf("Face.SelectCharmap error code: %d", errno)
+		return GetError(errno)
 	}
 	return nil
 }
@@ -158,7 +158,7 @@ func (f *Face) SelectCharmap(encoding int) error {
 func (f *Face) SetCharSize(charWidth, charHeight int64, horzResolution, vertResolution uint) error {
 	errno := C.FT_Set_Char_Size(f.handle, C.FT_F26Dot6(charWidth), C.FT_F26Dot6(charHeight), C.FT_UInt(horzResolution), C.FT_UInt(vertResolution))
 	if errno != 0 {
-		return fmt.Errorf("Face.SetCharSize error code: %d", errno)
+		return GetError(errno)
 	}
 	return nil
 }
@@ -166,7 +166,7 @@ func (f *Face) SetCharSize(charWidth, charHeight int64, horzResolution, vertReso
 func (f *Face) SetPixelSizes(width, height uint) error {
 	errno := C.FT_Set_Pixel_Sizes(f.handle, C.FT_UInt(width), C.FT_UInt(height))
 	if errno != 0 {
-		return fmt.Errorf("Face.SetPixelSizes error code: %d", errno)
+		return GetError(errno)
 	}
 	return nil
 }
@@ -174,7 +174,7 @@ func (f *Face) SetPixelSizes(width, height uint) error {
 func (f *Face) LoadChar(char rune, flags int32) error {
 	errno := C.FT_Load_Char(f.handle, C.FT_ULong(char), C.FT_Int32(flags))
 	if errno != 0 {
-		return fmt.Errorf("Face.LoadChar error code: %d", errno)
+		return GetError(errno)
 	}
 	return nil
 }
