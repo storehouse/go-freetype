@@ -2,7 +2,7 @@ language: go
 go: 1.2
 before_install:
 - sudo apt-get update -qq
-- sudo apt-get install -qq libfreetype6-dev ttf-droid
+- sudo apt-get install -qq libfreetype6-dev fonts-droid
 - go get -u gopkg.in/check.v1
 - go get -u code.google.com/p/go.tools/cmd/cover
 - go get -u github.com/mattn/goveralls

@@ -9,7 +9,7 @@ import (
 var (
 	fonts = []string{
 	  "/usr/share/fonts/truetype/ttf-droid/DroidSans.ttf",
-	  "/usr/share/fonts/truetype/DejaVuSans.ttf",
+	  "/usr/share/fonts/truetype/droid/DroidSans.ttf",
 	}
 )
 
