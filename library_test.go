@@ -7,7 +7,10 @@ import (
 )
 
 var (
-	fonts = []string{"/usr/share/fonts/truetype/ttf-droid/DroidSans.ttf", "/usr/share/fonts/truetype/DejaVuSans.ttf"}
+	fonts = []string{
+	  "/usr/share/fonts/truetype/ttf-droid/DroidSans.ttf",
+	  "/usr/share/fonts/truetype/DejaVuSans.ttf",
+	}
 )
 
 func Test(t *testing.T) { TestingT(t) }
