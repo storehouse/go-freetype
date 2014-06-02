@@ -8,6 +8,8 @@ package freetype
 import "C"
 
 import (
+	"image"
+	"reflect"
 	"unsafe"
 )
 
@@ -37,6 +39,30 @@ func (b *Bitmap) Pitch() int {
 func (b *Bitmap) Buffer() []byte {
 	l := b.handle.rows * b.handle.pitch
 	return C.GoBytes(unsafe.Pointer(b.handle.buffer), l)
+}
+
+// Image returns an Go image.Image.
+func (b *Bitmap) Image() (image.Image, error) {
+	// TODO Support the other pixel modes
+	switch b.PixelMode() {
+	case PixelModeNone, PixelModeMono, PixelModeGray2, PixelModeGray4, PixelModeLCD, PixelModeLCDV, PixelModeBGRA:
+		return nil, ErrUnsupportedPixelMode
+	case PixelModeGray:
+		if b.handle.num_grays == 256 {
+			size := int(b.handle.rows * b.handle.width)
+			header := reflect.SliceHeader{
+				Data: uintptr(unsafe.Pointer(b.handle.buffer)),
+				Len:  size,
+				Cap:  size,
+			}
+			return &image.Gray{
+				Pix:    *(*[]byte)(unsafe.Pointer(&header)),
+				Stride: int(b.handle.width),
+				Rect:   image.Rect(0, 0, int(b.handle.width), int(b.handle.rows)),
+			}, nil
+		}
+	}
+	return nil, ErrUnsupportedPixelMode
 }
 
 // This field is only used with PixelModeGray;
