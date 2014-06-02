@@ -18,17 +18,27 @@ type Face struct {
 
 // NewFace opens a font by its filePathName.
 func NewFace(library *Library, filePathName string, faceIndex int64) (*Face, error) {
-	f := &Face{}
+	face := &Face{}
 	cfilePathName := C.CString(filePathName)
 	defer C.free(unsafe.Pointer(cfilePathName))
-	errno := C.FT_New_Face(library.handle, cfilePathName, C.FT_Long(faceIndex), &f.handle)
+	errno := C.FT_New_Face(library.handle, cfilePathName, C.FT_Long(faceIndex), &face.handle)
 	if errno != 0 {
 		return nil, GetError(errno)
 	}
-	return f, nil
+	return face, nil
 }
 
 // TODO OpenFace
+
+func NewMemoryFace(library *Library, data []byte, faceIndex int64) (*Face, error) {
+	face := &Face{}
+	buffer := (*C.FT_Byte)(unsafe.Pointer(&data[0]))
+	errno := C.FT_New_Memory_Face(library.handle, buffer, C.FT_Long(len(data)), C.FT_Long(faceIndex), &face.handle)
+	if errno != 0 {
+		return nil, GetError(errno)
+	}
+	return face, nil
+}
 
 func (f *Face) Done() error {
 	errno := C.FT_Done_Face(f.handle)
