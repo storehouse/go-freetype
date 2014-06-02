@@ -147,6 +147,21 @@ func (f *Face) CharMap() CharMap {
 
 // Methods
 
+// GetCharIndex returns the glyph index of a given character code.
+// This function uses a charmap object to do the mapping.
+func (f *Face) GetCharIndex(char rune) uint {
+	index := C.FT_Get_Char_Index(f.handle, C.FT_ULong(char))
+	return uint(index)
+}
+
+func (f *Face) LoadChar(char rune, flags int32) error {
+	errno := C.FT_Load_Char(f.handle, C.FT_ULong(char), C.FT_Int32(flags))
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
+}
+
 func (f *Face) SelectCharmap(encoding int) error {
 	errno := C.FT_Select_Charmap(f.handle, C.FT_Encoding(encoding))
 	if errno != 0 {
@@ -165,14 +180,6 @@ func (f *Face) SetCharSize(charWidth, charHeight int64, horzResolution, vertReso
 
 func (f *Face) SetPixelSizes(width, height uint) error {
 	errno := C.FT_Set_Pixel_Sizes(f.handle, C.FT_UInt(width), C.FT_UInt(height))
-	if errno != 0 {
-		return GetError(errno)
-	}
-	return nil
-}
-
-func (f *Face) LoadChar(char rune, flags int32) error {
-	errno := C.FT_Load_Char(f.handle, C.FT_ULong(char), C.FT_Int32(flags))
 	if errno != 0 {
 		return GetError(errno)
 	}
