@@ -33,14 +33,13 @@ func (b *Bitmap) Pitch() int {
 	return int(b.handle.pitch)
 }
 
-// A typeless pointer to the bitmap buffer.
-// This value should be aligned on 32-bit boundaries in most cases.
+// Buffer returns the bitmap buffer.
 func (b *Bitmap) Buffer() []byte {
 	l := b.handle.rows * b.handle.pitch
 	return C.GoBytes(unsafe.Pointer(b.handle.buffer), l)
 }
 
-// This field is only used with FT_PIXEL_MODE_GRAY;
+// This field is only used with PixelModeGray;
 // it gives the number of gray levels used in the bitmap.
 func (b *Bitmap) NumGrays() int {
 	return int(b.handle.num_grays)
