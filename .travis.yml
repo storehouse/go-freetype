@@ -7,8 +7,6 @@ before_install:
 - go get -u code.google.com/p/go.tools/cmd/cover
 - go get -u github.com/mattn/goveralls
 script:
-- ls /usr/share/fonts/
-- ls /usr/share/fonts/truetype/
 - go test -race -i
 - go test -covermode=count -coverprofile=profile.cov
 - go test -v -gocheck.v -race -cpu=2 ./...
