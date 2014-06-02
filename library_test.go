@@ -8,16 +8,18 @@ import (
 
 var (
 	fonts = []string{
-	  "/usr/share/fonts/truetype/ttf-droid/DroidSans.ttf",
-	  "/usr/share/fonts/truetype/droid/DroidSans.ttf",
+		"/usr/share/fonts/truetype/ttf-droid/DroidSans.ttf",
+		"/usr/share/fonts/truetype/droid/DroidSans.ttf",
+		"/usr/share/fonts/truetype/DroidSans.ttf",
 	}
 )
 
 func Test(t *testing.T) { TestingT(t) }
 
 type FreetypeSuite struct {
-	lib  *Library
-	face *Face
+	lib      *Library
+	face     *Face
+	fileName string
 }
 
 var _ = Suite(&FreetypeSuite{})
@@ -28,22 +30,20 @@ func (s *FreetypeSuite) SetUpSuite(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(s.lib, Not(IsNil))
 
-	var fontFilePathName string
-
 	for i := range fonts {
 		_, err := os.Open(fonts[i])
 		if err == nil {
-			fontFilePathName = fonts[i]
+			s.fileName = fonts[i]
 			break
 		}
 	}
 
-	if len(fontFilePathName) == 0 {
+	if len(s.fileName) == 0 {
 		c.Skip("no font file found")
 		return
 	}
 
-	s.face, err = NewFace(s.lib, fontFilePathName, 0)
+	s.face, err = NewFace(s.lib, s.fileName, 0)
 	c.Assert(err, IsNil)
 	c.Assert(s.face, Not(IsNil))
 }
