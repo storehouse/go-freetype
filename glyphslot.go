@@ -78,3 +78,12 @@ func (g *GlyphSlot) LsbDelta() int64 {
 func (g *GlyphSlot) RsbDelta() int64 {
 	return int64(g.handle.rsb_delta)
 }
+
+// functions
+func (g *GlyphSlot) Render(mode int) error {
+	errno := C.FT_Render_Glyph(g.handle, C.FT_Render_Mode(mode))
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
+}

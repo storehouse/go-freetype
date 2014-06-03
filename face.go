@@ -155,7 +155,7 @@ func (f *Face) CharMap() CharMap {
 	return CharMap{f.handle.charmap}
 }
 
-// Methods
+// functions
 
 // GetCharIndex returns the glyph index of a given character code.
 // This function uses a charmap object to do the mapping.
@@ -164,8 +164,16 @@ func (f *Face) GetCharIndex(char rune) uint {
 	return uint(index)
 }
 
-func (f *Face) LoadChar(char rune, flags int32) error {
+func (f *Face) LoadChar(char rune, flags int) error {
 	errno := C.FT_Load_Char(f.handle, C.FT_ULong(char), C.FT_Int32(flags))
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
+}
+
+func (f *Face) LoadGlyph(index uint, flags int) error {
+	errno := C.FT_Load_Glyph(f.handle, C.FT_UInt(index), C.FT_Int32(flags))
 	if errno != 0 {
 		return GetError(errno)
 	}
