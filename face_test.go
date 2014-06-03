@@ -50,4 +50,11 @@ func (s *FreetypeSuite) TestTutorial1(c *C) {
 
 	err = memoryFace.Glyph().Render(RenderModeNormal)
 	c.Assert(err, IsNil)
+
+	// free memory
+	err = face.Done()
+	c.Assert(err, IsNil)
+
+	err = memoryFace.Done()
+	c.Assert(err, IsNil)
 }
