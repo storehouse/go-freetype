@@ -48,19 +48,24 @@ func (b *Bitmap) Image() (image.Image, error) {
 	case PixelModeNone, PixelModeMono, PixelModeGray2, PixelModeGray4, PixelModeLCD, PixelModeLCDV, PixelModeBGRA:
 		return nil, ErrUnsupportedPixelMode
 	case PixelModeGray:
-		if b.handle.num_grays == 256 {
-			size := int(b.handle.rows * b.handle.width)
-			header := reflect.SliceHeader{
-				Data: uintptr(unsafe.Pointer(b.handle.buffer)),
-				Len:  size,
-				Cap:  size,
-			}
-			return &image.Gray{
-				Pix:    *(*[]byte)(unsafe.Pointer(&header)),
-				Stride: int(b.handle.width),
-				Rect:   image.Rect(0, 0, int(b.handle.width), int(b.handle.rows)),
-			}, nil
+		return b.GrayImage()
+	}
+	return nil, ErrUnsupportedPixelMode
+}
+
+func (b *Bitmap) GrayImage() (*image.Gray, error) {
+	if b.handle.num_grays == 256 {
+		size := int(b.handle.rows * b.handle.width)
+		header := reflect.SliceHeader{
+			Data: uintptr(unsafe.Pointer(b.handle.buffer)),
+			Len:  size,
+			Cap:  size,
 		}
+		return &image.Gray{
+			Pix:    *(*[]byte)(unsafe.Pointer(&header)),
+			Stride: int(b.handle.width),
+			Rect:   image.Rect(0, 0, int(b.handle.width), int(b.handle.rows)),
+		}, nil
 	}
 	return nil, ErrUnsupportedPixelMode
 }
