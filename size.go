@@ -17,6 +17,6 @@ func (s *Size) Face() Face {
 }
 
 // size metrics
-func (s *Size) Metrices() SizeMetrices {
-	return SizeMetrices{s.handle.metrics}
+func (s *Size) Metrics() SizeMetrics {
+	return SizeMetrics{s.handle.metrics}
 }
