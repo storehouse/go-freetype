@@ -203,3 +203,7 @@ func (f *Face) SetPixelSizes(width, height uint) error {
 	}
 	return nil
 }
+
+func (f *Face) SetTransform(matrix *Matrix, delta *Vector) {
+	C.FT_Set_Transform(f.handle, &matrix.handle, &delta.handle)
+}
