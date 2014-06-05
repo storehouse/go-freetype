@@ -4,6 +4,7 @@ package freetype
 #cgo pkg-config: freetype2
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_GLYPH_H
 */
 import "C"
 
@@ -86,4 +87,14 @@ func (g *GlyphSlot) Render(mode int) error {
 		return GetError(errno)
 	}
 	return nil
+}
+
+func (g *GlyphSlot) GetGlyph() (*Glyph, error) {
+	glyphRec := C.FT_GlyphRec{}
+	glyph := (C.FT_Glyph)(unsafe.Pointer(&glyphRec))
+	errno := C.FT_Get_Glyph(g.handle, &glyph)
+	if errno != 0 {
+		return nil, GetError(errno)
+	}
+	return &Glyph{glyph}, nil
 }
