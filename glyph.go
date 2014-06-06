@@ -23,3 +23,14 @@ func (g *Glyph) Format() int {
 func (g *Glyph) Advance() *Vector {
 	return &Vector{g.handle.advance}
 }
+
+// functions
+
+func (g *Glyph) Copy() (*Glyph, error) {
+	var glyph2 C.FT_Glyph
+	errno := C.FT_Glyph_Copy(g.handle, &glyph2)
+	if errno != 0 {
+		return nil, GetError(errno)
+	}
+	return &Glyph{glyph2}, nil
+}
