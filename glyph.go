@@ -50,7 +50,11 @@ func (g *Glyph) GetCBox(bboxMode uint) *BBox {
 }
 
 func (g *Glyph) ToBitmap(renderMode int, origin *Vector, destroy bool) error {
-	errno := C.FT_Glyph_To_Bitmap(g.handle, renderMode, origin.handle, C.FT_Bool(destroy))
+	var d C.FT_Bool
+	if destroy {
+		d = 1
+	}
+	errno := C.FT_Glyph_To_Bitmap(&g.handle, C.FT_Render_Mode(renderMode), &origin.handle, d)
 	if errno != 0 {
 		return GetError(errno)
 	}
