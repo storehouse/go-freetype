@@ -8,6 +8,14 @@ package freetype
 */
 import "C"
 
+const (
+	GlyphBBoxUnscaled  int = C.FT_GLYPH_BBOX_UNSCALED
+	GlyphBBoxSubpixels int = C.FT_GLYPH_BBOX_SUBPIXELS
+	GlyphBBoxGridfit   int = C.FT_GLYPH_BBOX_GRIDFIT
+	GlyphBBoxTruncate  int = C.FT_GLYPH_BBOX_TRUNCATE
+	GlyphBBoxPixels    int = C.FT_GLYPH_BBOX_PIXELS
+)
+
 type Glyph struct {
 	handle C.FT_Glyph
 }
@@ -33,6 +41,12 @@ func (g *Glyph) Copy() (*Glyph, error) {
 		return nil, GetError(errno)
 	}
 	return &Glyph{glyph2}, nil
+}
+
+func (g *Glyph) GetCBox(bboxMode uint) *BBox {
+	var bbox C.FT_BBox
+	C.FT_Glyph_Get_CBox(g.handle, C.FT_UInt(bboxMode), &bbox)
+	return &BBox{bbox}
 }
 
 func (g *Glyph) Transform(matrix *Matrix, delta *Vector) error {
