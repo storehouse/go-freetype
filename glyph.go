@@ -34,3 +34,11 @@ func (g *Glyph) Copy() (*Glyph, error) {
 	}
 	return &Glyph{glyph2}, nil
 }
+
+func (g *Glyph) Transform(matrix *Matrix, delta *Vector) error {
+	errno := C.FT_Glyph_Transform(g.handle, &matrix.handle, &delta.handle)
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
+}
