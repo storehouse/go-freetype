@@ -49,6 +49,14 @@ func (g *Glyph) GetCBox(bboxMode uint) *BBox {
 	return &BBox{bbox}
 }
 
+func (g *Glyph) ToBitmap(renderMode int, origin *Vector, destroy bool) error {
+	errno := C.FT_Glyph_To_Bitmap(g.handle, renderMode, origin.handle, C.FT_Bool(destroy))
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
+}
+
 func (g *Glyph) Transform(matrix *Matrix, delta *Vector) error {
 	errno := C.FT_Glyph_Transform(g.handle, &matrix.handle, &delta.handle)
 	if errno != 0 {
