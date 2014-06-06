@@ -90,8 +90,7 @@ func (g *GlyphSlot) Render(mode int) error {
 }
 
 func (g *GlyphSlot) GetGlyph() (*Glyph, error) {
-	glyphRec := C.FT_GlyphRec{}
-	glyph := (C.FT_Glyph)(unsafe.Pointer(&glyphRec))
+	var glyph C.FT_Glyph
 	errno := C.FT_Get_Glyph(g.handle, &glyph)
 	if errno != 0 {
 		return nil, GetError(errno)
