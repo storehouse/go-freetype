@@ -44,8 +44,8 @@ func (g *GlyphSlot) Advance() *Vector {
 	return &Vector{g.handle.advance}
 }
 
-func (g *GlyphSlot) Format() uint64 {
-	return uint64(g.handle.format)
+func (g *GlyphSlot) Format() int {
+	return int(g.handle.format)
 }
 
 func (g *GlyphSlot) Bitmap() *Bitmap {
@@ -58,6 +58,10 @@ func (g *GlyphSlot) BitmapLeft() int {
 
 func (g *GlyphSlot) BitmapTop() int {
 	return int(g.handle.bitmap_top)
+}
+
+func (g *GlyphSlot) Outline() *Outline {
+	return &Outline{g.handle.outline}
 }
 
 func (g *GlyphSlot) NumSubGlyphs() uint {
