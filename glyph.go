@@ -34,6 +34,10 @@ func (g *Glyph) Advance() *Vector {
 
 // functions
 
+func (g *Glyph) Done() {
+	C.FT_Done_Glyph(g.handle)
+}
+
 func (g *Glyph) Copy() (*Glyph, error) {
 	var glyph2 C.FT_Glyph
 	errno := C.FT_Glyph_Copy(g.handle, &glyph2)
