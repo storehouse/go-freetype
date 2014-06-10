@@ -5,6 +5,7 @@ package freetype
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
+#include FT_STROKER_H
 */
 import "C"
 
@@ -51,6 +52,35 @@ func (g *Glyph) GetCBox(bboxMode uint) *BBox {
 	var bbox C.FT_BBox
 	C.FT_Glyph_Get_CBox(g.handle, C.FT_UInt(bboxMode), &bbox)
 	return &BBox{bbox}
+}
+
+// Stroke a given outline glyph object with a given stroker.
+func (g *Glyph) Stroke(stroker *Stroker, destroy bool) error {
+	var d C.FT_Bool
+	if destroy {
+		d = 1
+	}
+	errno := C.FT_Glyph_Stroke(&g.handle, stroker.handle, d)
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
+}
+
+// Stroke a given outline glyph object with a given stroker, but only return either its inside or outside border.
+func (g *Glyph) StrokeBorder(stroker *Stroker, inside, destroy bool) error {
+	var i, d C.FT_Bool
+	if inside {
+		i = 1
+	}
+	if destroy {
+		d = 1
+	}
+	errno := C.FT_Glyph_StrokeBorder(&g.handle, stroker.handle, i, d)
+	if errno != 0 {
+		return GetError(errno)
+	}
+	return nil
 }
 
 func (g *Glyph) ToBitmap(renderMode int, origin *Vector, destroy bool) error {
