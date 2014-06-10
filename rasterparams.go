@@ -4,10 +4,12 @@ package freetype
 #cgo pkg-config: freetype2
 #include <ft2build.h>
 #include FT_FREETYPE_H
+void ftRasterParamsGraySpansCB(FT_Raster_Params* params);
 */
 import "C"
 
 import (
+	"reflect"
 	"unsafe"
 )
 
@@ -19,11 +21,12 @@ const (
 )
 
 type RasterParams struct {
-	handle C.FT_Raster_Params
+	handle       C.FT_Raster_Params
+	graySpanFunc SpanFunc
 }
 
 func NewRasterParams() *RasterParams {
-	return &RasterParams{C.FT_Raster_Params{}}
+	return &RasterParams{handle: C.FT_Raster_Params{}}
 }
 
 // The target bitmap.
@@ -35,7 +38,13 @@ func (params *RasterParams) SetTarget(target *Bitmap) {
 	params.handle.target = &target.handle
 }
 
-// TODO const void* source
+func (params *RasterParams) Source() unsafe.Pointer {
+	return params.handle.source
+}
+
+func (params *RasterParams) SetSource(source *interface{}) {
+	params.handle.source = unsafe.Pointer(source)
+}
 
 // The rendering flags.
 func (params *RasterParams) Flags() int {
@@ -46,14 +55,34 @@ func (params *RasterParams) SetFlags(flags int) {
 	params.handle.flags = C.int(flags)
 }
 
-// TODO FT_SpanFunc gray_spans
-
-func (params *RasterParams) User() unsafe.Pointer {
-	return params.handle.user
+func (params *RasterParams) GraySpans() SpanFunc {
+	return params.graySpanFunc
 }
 
-func (params *RasterParams) SetUser(user *interface{}) {
-	params.handle.user = unsafe.Pointer(user)
+func (params *RasterParams) SetGraySpans(f SpanFunc) {
+	params.handle.user = unsafe.Pointer(&params.handle)
+	rasterParams[&params.handle] = params
+	params.graySpanFunc = f
+	C.ftRasterParamsGraySpansCB(&params.handle)
+}
+
+var rasterParams map[*C.FT_Raster_Params]*RasterParams = make(map[*C.FT_Raster_Params]*RasterParams)
+
+//export goRasterParamsGraySpans
+func goRasterParamsGraySpans(y, count C.FT_Int, spans *C.FT_Span, user unsafe.Pointer) {
+	c := int(count)
+	hdr := reflect.SliceHeader{
+		Data: uintptr(unsafe.Pointer(spans)),
+		Len:  c,
+		Cap:  c,
+	}
+	goSlice := *(*[]C.FT_Span)(unsafe.Pointer(&hdr))
+	s := make([]Span, c)
+	for i := range goSlice {
+		s[i] = Span{goSlice[i]}
+	}
+	params := rasterParams[(*C.FT_Raster_Params)(user)]
+	params.graySpanFunc(int(y), c, s)
 }
 
 // An optional clipping box. It is only used in direct rendering mode.

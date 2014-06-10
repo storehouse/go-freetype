@@ -7,11 +7,7 @@ package freetype
 */
 import "C"
 
-import (
-	"unsafe"
-)
-
-type SpanFunc func(y, count int, spans []Span, user unsafe.Pointer)
+type SpanFunc func(y, count int, spans []Span)
 
 type Span struct {
 	handle C.FT_Span
