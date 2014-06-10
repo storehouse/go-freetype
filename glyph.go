@@ -102,3 +102,7 @@ func (g *Glyph) Transform(matrix *Matrix, delta *Vector) error {
 	}
 	return nil
 }
+
+func (g *Glyph) ReinterpretAsOutlineGlyph() *OutlineGlyph {
+	return CastGlyphToOutlineGlyph(g)
+}
