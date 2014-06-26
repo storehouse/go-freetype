@@ -4,17 +4,24 @@ package freetype
 #cgo pkg-config: freetype2
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_BITMAP_H
 */
 import "C"
 
 import (
 	"image"
+	"image/color"
 	"reflect"
 	"unsafe"
 )
 
 type Bitmap struct {
 	handle C.FT_Bitmap
+}
+
+func (b *Bitmap) Done(lib *Library) error {
+	errno := C.FT_Bitmap_Done(lib.handle, &b.handle)
+	return GetError(errno)
 }
 
 // The number of bitmap rows.
@@ -45,14 +52,71 @@ func (b *Bitmap) Buffer() []byte {
 func (b *Bitmap) Image() (image.Image, error) {
 	// TODO Support the other pixel modes
 	switch b.PixelMode() {
-	case PixelModeNone, PixelModeMono, PixelModeGray2, PixelModeGray4, PixelModeLCD, PixelModeLCDV, PixelModeBGRA:
+	case PixelModeNone, PixelModeMono, PixelModeGray2, PixelModeGray4, PixelModeLCD, PixelModeLCDV:
 		return nil, ErrUnsupportedPixelMode
+	case PixelModeBGRA:
+		return b.NRGBA()
 	case PixelModeGray:
 		return b.GrayImage()
 	}
 	return nil, ErrUnsupportedPixelMode
 }
 
+// NRGBA returns a converted freetype BGRA bitmap.
+// NOTE: Memory is copied.
+func (b *Bitmap) NRGBA() (*image.NRGBA, error) {
+	if b.PixelMode() == PixelModeBGRA {
+		rows := b.Rows()
+		width := b.Width()
+		pitch := b.Pitch()
+		size := rows * width
+		header := reflect.SliceHeader{
+			Data: uintptr(unsafe.Pointer(b.handle.buffer)),
+			Len:  size,
+			Cap:  size,
+		}
+		pix := *(*[]byte)(unsafe.Pointer(&header))
+		img := image.NewNRGBA(image.Rect(0, 0, width, rows))
+
+		var i int
+		pitchX := 4
+		if b.Pitch() < 0 {
+			i = size
+			pitchX = -4
+		}
+		for y := 0; y < rows; y++ {
+			for x := 0; x < width; x++ {
+				img.Set(x, y, color.NRGBA{pix[i+2], pix[i+1], pix[i], pix[i+3]})
+				i += pitchX
+			}
+			i += pitch
+		}
+		return img, nil
+	}
+	return nil, ErrUnsupportedPixelMode
+}
+
+// AlphaImage converts an freetype bitmap of PixelModeGray into an Go image.Alpha.
+// NOTE: Memory is not copied.
+func (b *Bitmap) AlphaImage() (*image.Alpha, error) {
+	if b.handle.num_grays == 256 {
+		size := int(b.handle.rows * b.handle.width)
+		header := reflect.SliceHeader{
+			Data: uintptr(unsafe.Pointer(b.handle.buffer)),
+			Len:  size,
+			Cap:  size,
+		}
+		return &image.Alpha{
+			Pix:    *(*[]byte)(unsafe.Pointer(&header)),
+			Stride: int(b.handle.width),
+			Rect:   image.Rect(0, 0, int(b.handle.width), int(b.handle.rows)),
+		}, nil
+	}
+	return nil, ErrUnsupportedPixelMode
+}
+
+// GrayImage returns a gray image.
+// NOTE: Memory is not copied.
 func (b *Bitmap) GrayImage() (*image.Gray, error) {
 	if b.handle.num_grays == 256 {
 		size := int(b.handle.rows * b.handle.width)
