@@ -44,7 +44,7 @@ func (b *Bitmap) Pitch() int {
 
 // Buffer returns the bitmap buffer.
 func (b *Bitmap) Buffer() []byte {
-	l := b.handle.rows * b.handle.pitch
+	l := C.int(b.handle.rows) * b.handle.pitch
 	return C.GoBytes(unsafe.Pointer(b.handle.buffer), l)
 }
 
